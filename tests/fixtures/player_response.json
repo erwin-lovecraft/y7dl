@@ -1,0 +1,84 @@
+{
+  "playabilityStatus": {
+    "status": "OK"
+  },
+  "videoDetails": {
+    "videoId": "dQw4w9WgXcQ",
+    "title": "Test Video",
+    "lengthSeconds": "212",
+    "author": "Test Channel",
+    "viewCount": "1234567",
+    "shortDescription": "A fixture for offline tests."
+  },
+  "streamingData": {
+    "expiresInSeconds": "21540",
+    "formats": [
+      {
+        "itag": 18,
+        "url": "https://rr1---sn-test.googlevideo.com/videoplayback?expire=1&itag=18",
+        "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+        "bitrate": 635291,
+        "width": 640,
+        "height": 360,
+        "lastModified": "1700000000000000",
+        "contentLength": "10000000",
+        "quality": "medium",
+        "fps": 25,
+        "qualityLabel": "360p",
+        "projectionType": "RECTANGULAR",
+        "averageBitrate": 635180,
+        "audioQuality": "AUDIO_QUALITY_LOW",
+        "approxDurationMs": "212091",
+        "audioSampleRate": "44100",
+        "audioChannels": 2
+      }
+    ],
+    "adaptiveFormats": [
+      {
+        "itag": 137,
+        "url": "https://rr1---sn-test.googlevideo.com/videoplayback?expire=1&itag=137",
+        "mimeType": "video/mp4; codecs=\"avc1.640028\"",
+        "bitrate": 4423000,
+        "width": 1920,
+        "height": 1080,
+        "initRange": { "start": "0", "end": "740" },
+        "indexRange": { "start": "741", "end": "1250" },
+        "contentLength": "117212577",
+        "quality": "hd1080",
+        "fps": 25,
+        "qualityLabel": "1080p",
+        "averageBitrate": 4421064,
+        "approxDurationMs": "212048"
+      },
+      {
+        "itag": 136,
+        "signatureCipher": "s=AAsig12345&sp=sig&url=https%3A%2F%2Frr1---sn-test.googlevideo.com%2Fvideoplayback%3Fexpire%3D1%26itag%3D136",
+        "mimeType": "video/mp4; codecs=\"avc1.4d401f\"",
+        "bitrate": 2326000,
+        "width": 1280,
+        "height": 720,
+        "contentLength": "61468086",
+        "quality": "hd720",
+        "fps": 25,
+        "qualityLabel": "720p",
+        "averageBitrate": 2324351,
+        "approxDurationMs": "212048"
+      },
+      {
+        "itag": 140,
+        "url": "https://rr1---sn-test.googlevideo.com/videoplayback?expire=1&itag=140",
+        "mimeType": "audio/mp4; codecs=\"mp4a.40.2\"",
+        "bitrate": 130269,
+        "initRange": { "start": "0", "end": "631" },
+        "indexRange": { "start": "632", "end": "1131" },
+        "contentLength": "3433514",
+        "quality": "tiny",
+        "audioQuality": "AUDIO_QUALITY_MEDIUM",
+        "averageBitrate": 129480,
+        "approxDurationMs": "212091",
+        "audioSampleRate": "44100",
+        "audioChannels": 2
+      }
+    ]
+  }
+}
