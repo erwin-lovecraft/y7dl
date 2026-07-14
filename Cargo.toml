@@ -5,6 +5,9 @@ edition = "2024"
 license = "GPL-3.0-or-later"
 description = "Rust port of kkdai/youtube: extract video info and download streams"
 repository = "https://github.com/erwin-lovecraft/y7dl"
+readme = "README.md"
+keywords = ["youtube", "download", "video", "innertube"]
+categories = ["multimedia::video", "api-bindings"]
 
 [dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "io-util", "sync"] }
