@@ -34,6 +34,10 @@ pub struct Client {
     /// Parsed signature ops cached per player-JS path (fetching and parsing
     /// `base.js` is expensive; the player version changes rarely).
     player_ops: Mutex<Option<(String, Vec<SigOp>)>>,
+    /// Anonymous session token from previous responses. Some videos answer
+    /// `LOGIN_REQUIRED: Sign in to confirm you're not a bot` unless the
+    /// request carries the `visitorData` YouTube itself handed out.
+    visitor_data: Mutex<Option<String>>,
 }
 
 impl Default for Client {
@@ -52,48 +56,69 @@ impl Client {
         Client {
             http,
             player_ops: Mutex::new(None),
+            visitor_data: Mutex::new(None),
         }
     }
 
     /// Fetches metadata and the available formats for a video URL or bare ID.
     pub async fn get_video(&self, url_or_id: &str) -> Result<Video> {
         let id = extract_video_id(url_or_id)?;
+
+        let sent_visitor = self.visitor_data.lock().await.clone();
         let response = self.player_response(&id).await?;
-        Video::from_player_response(&id, response)
+        match Video::from_player_response(&id, response) {
+            // Per-video bot check: even the first, refused response carries a
+            // fresh `visitorData` token; echoing it back satisfies the check.
+            Err(Error::VideoUnavailable { status, reason }) if status == "LOGIN_REQUIRED" => {
+                let visitor_now = self.visitor_data.lock().await.clone();
+                if visitor_now.is_some() && visitor_now != sent_visitor {
+                    let retry = self.player_response(&id).await?;
+                    Video::from_player_response(&id, retry)
+                } else {
+                    Err(Error::VideoUnavailable { status, reason })
+                }
+            }
+            other => other,
+        }
     }
 
     async fn player_response(&self, video_id: &str) -> Result<PlayerResponse> {
+        let visitor_data = self.visitor_data.lock().await.clone();
+
+        let mut client_context = json!({
+            "clientName": VR_CLIENT_NAME,
+            "clientVersion": VR_CLIENT_VERSION,
+            "deviceMake": "Oculus",
+            "deviceModel": "Quest 3",
+            "androidSdkVersion": 32,
+            "osName": "Android",
+            "osVersion": "12L",
+            "userAgent": VR_USER_AGENT,
+            "hl": "en",
+            "gl": "US",
+            "utcOffsetMinutes": 0
+        });
+        if let Some(vd) = &visitor_data {
+            client_context["visitorData"] = json!(vd);
+        }
         let body = json!({
             "videoId": video_id,
-            "context": {
-                "client": {
-                    "clientName": VR_CLIENT_NAME,
-                    "clientVersion": VR_CLIENT_VERSION,
-                    "deviceMake": "Oculus",
-                    "deviceModel": "Quest 3",
-                    "androidSdkVersion": 32,
-                    "osName": "Android",
-                    "osVersion": "12L",
-                    "userAgent": VR_USER_AGENT,
-                    "hl": "en",
-                    "gl": "US",
-                    "utcOffsetMinutes": 0
-                }
-            },
+            "context": { "client": client_context },
             "contentCheckOk": true,
             "racyCheckOk": true
         });
 
-        let response = self
+        let mut request = self
             .http
             .post(PLAYER_ENDPOINT)
             .query(&[("prettyPrint", "false")])
             .header("User-Agent", VR_USER_AGENT)
             .header("X-Youtube-Client-Name", VR_CLIENT_ID)
-            .header("X-Youtube-Client-Version", VR_CLIENT_VERSION)
-            .json(&body)
-            .send()
-            .await?;
+            .header("X-Youtube-Client-Version", VR_CLIENT_VERSION);
+        if let Some(vd) = &visitor_data {
+            request = request.header("X-Goog-Visitor-Id", vd.as_str());
+        }
+        let response = request.json(&body).send().await?;
 
         let status = response.status();
         if !status.is_success() {
@@ -101,7 +126,17 @@ impl Client {
         }
 
         let text = response.text().await?;
-        Ok(serde_json::from_str(&text)?)
+        let parsed: PlayerResponse = serde_json::from_str(&text)?;
+
+        // Remember the session token YouTube handed out for later requests.
+        if let Some(vd) = parsed
+            .response_context
+            .as_ref()
+            .and_then(|c| c.visitor_data.clone())
+        {
+            *self.visitor_data.lock().await = Some(vd);
+        }
+        Ok(parsed)
     }
 
     /// Resolves the playable stream URL for a format, deciphering

@@ -8,9 +8,18 @@ use crate::video::Format;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayerResponse {
+    pub response_context: Option<ResponseContext>,
     pub playability_status: Option<PlayabilityStatus>,
     pub video_details: Option<VideoDetails>,
     pub streaming_data: Option<StreamingData>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ResponseContext {
+    /// Anonymous session token. Echoing it back defeats the per-video
+    /// "Sign in to confirm you're not a bot" check.
+    pub visitor_data: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
