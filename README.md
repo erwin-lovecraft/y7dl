@@ -5,9 +5,7 @@ extracting YouTube video info (itag, quality, mime type) from a link and
 downloading a stream at a chosen quality.
 
 > This project exists for learning purposes and is fully open source under the
-> [GPL-3.0-or-later](LICENSE) license. Its copyleft terms mean that any project
-> incorporating this code must be open source as well — see
-> [License](#license).
+> [MIT](LICENSE) license.
 
 **Scope:** info extraction and stream download only. Transcoding/muxing,
 playlists, and captions are intentionally out of scope. Adaptive (DASH)
@@ -156,14 +154,8 @@ YouTube's behavior; the parsing logic is covered offline by fixture JSON in
 
 ## License
 
-Licensed under the [GNU General Public License v3.0 or later](LICENSE)
-(`GPL-3.0-or-later`).
-
-This is a strong copyleft license: you are free to use, study, modify, and
-redistribute this code, but **any project that incorporates it — including
-projects that link against it as a library — must itself be released as open
-source under GPL-compatible terms**, with its source code made available to
-its users. If your project cannot meet that requirement, do not use this code.
+Licensed under the [MIT](LICENSE)
+(`MIT`).
 
 This project was written for learning — study it, fork it, break it, port it.
 
