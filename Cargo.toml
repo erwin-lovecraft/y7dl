@@ -2,7 +2,7 @@
 name = "y7dl"
 version = "0.1.0"
 edition = "2024"
-license = "GPL-3.0-or-later"
+license = "MIT"
 description = "Rust port of kkdai/youtube: extract video info and download streams"
 repository = "https://github.com/erwin-lovecraft/y7dl"
 readme = "README.md"
