@@ -7,13 +7,15 @@ downloading a stream at a chosen quality.
 > This project exists for learning purposes and is fully open source under the
 > [MIT](LICENSE) license.
 
-**Scope:** info extraction and stream download only. Transcoding/muxing,
+**Scope:** search, info extraction, and stream download only. Transcoding/muxing,
 playlists, and captions are intentionally out of scope. Adaptive (DASH)
 formats are downloaded as-is — video-only and audio-only streams are separate
 files; merging them is up to you (e.g. with ffmpeg).
 
 ## Features
 
+- Search YouTube by query — returns `SearchResult` items with title, author,
+  duration, view count, and URL. No API key required.
 - Extract video metadata (title, author, duration, view count) and the full
   format list — itag, quality/qualityLabel, mimeType, bitrate, size — from a
   URL or bare video ID.
@@ -27,6 +29,38 @@ files; merging them is up to you (e.g. with ffmpeg).
   `y7dl::Result<T>`; no panics on bad input or API surprises.
 
 ## Library usage
+
+### Search
+
+```rust
+use y7dl::{Client, Result};
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let client = Client::new();
+
+    // Search for videos (limit 5).
+    let results = client.search("rust programming", 5, None).await?;
+    for r in &results {
+        println!("{} — {} ({}) [{}]", r.title, r.author, r.views, r.url);
+    }
+    Ok(())
+}
+```
+
+Filter constants narrow the results:
+
+| Constant | Effect |
+|---|---|
+| `search::FILTER_TODAY` | uploaded today |
+| `search::FILTER_THIS_WEEK` | uploaded this week |
+| `search::FILTER_THIS_MONTH` | uploaded this month |
+| `search::FILTER_TYPE_CHANNEL` | channels only |
+| `search::FILTER_TYPE_PLAYLIST` | playlists only |
+
+Pass a filter as the third argument to `client.search()`.
+
+### Video info & download
 
 ```rust
 use y7dl::{Client, Result};
@@ -120,6 +154,11 @@ $ cargo run -- dQw4w9WgXcQ --quality 720p -o video.mp4
 
 ## How it works
 
+**Search:** GETs `youtube.com/results?search_query=...` with a videos-only
+filter, then extracts the embedded `ytInitialData` JSON from the HTML by
+brace-depth tracking and recursively collects `videoRenderer` entries.
+
+**Video info & download:**
 1. The video ID is parsed out of the URL.
 2. Video metadata is fetched from YouTube's InnerTube API
    (`/youtubei/v1/player`), impersonating the `ANDROID_VR` client. Unlike the

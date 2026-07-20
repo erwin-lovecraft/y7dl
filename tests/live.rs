@@ -72,3 +72,34 @@ async fn unavailable_video_yields_error() {
         .expect_err("expected failure");
     println!("OK, got expected error: {err}");
 }
+
+#[tokio::test]
+#[ignore = "hits the live YouTube site"]
+async fn search_returns_results() {
+    let client = Client::new();
+    let results = client
+        .search("rust programming language", 5, None)
+        .await
+        .expect("search");
+
+    assert!(!results.is_empty(), "expected at least one result");
+    assert!(results.len() <= 5, "should respect the limit");
+
+    println!("search results:");
+    for (i, r) in results.iter().enumerate() {
+        assert!(!r.video_id.is_empty(), "video_id should not be empty");
+        assert!(!r.title.is_empty(), "title should not be empty");
+        assert!(
+            r.url.starts_with("https://www.youtube.com/watch?v="),
+            "url should be a valid YouTube watch link"
+        );
+        println!(
+            "  {}. {} — {} ({}) [{}]",
+            i + 1,
+            r.title,
+            r.author,
+            r.duration,
+            r.url
+        );
+    }
+}

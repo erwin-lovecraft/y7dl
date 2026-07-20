@@ -6,9 +6,11 @@ pub mod client;
 mod decipher;
 pub mod error;
 mod response;
+pub mod search;
 pub mod utils;
 pub mod video;
 
 pub use client::Client;
 pub use error::{Error, Result};
+pub use search::SearchResult;
 pub use video::{Format, Video};

@@ -7,6 +7,7 @@ use tokio::sync::Mutex;
 use crate::decipher::{self, SigOp};
 use crate::error::{Error, Result};
 use crate::response::PlayerResponse;
+use crate::search;
 use crate::utils::{extract_video_id, parse_query};
 use crate::video::{Format, Video};
 
@@ -80,6 +81,20 @@ impl Client {
             }
             other => other,
         }
+    }
+
+    /// Search YouTube for videos matching `query`.
+    ///
+    /// `limit` caps the number of results (0 = no cap).
+    /// `filter` is an optional `sp` parameter for narrowing results
+    /// (e.g. [`search::FILTER_TODAY`], [`search::FILTER_TYPE_CHANNEL`]).
+    pub async fn search(
+        &self,
+        query: &str,
+        limit: usize,
+        filter: Option<&str>,
+    ) -> Result<Vec<search::SearchResult>> {
+        search::search(&self.http, query, limit, filter).await
     }
 
     async fn player_response(&self, video_id: &str) -> Result<PlayerResponse> {
